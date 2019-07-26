@@ -1,0 +1,38 @@
+
+#!/usr/bin/env python
+
+'''
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, version 3.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+'''
+
+# Features:
+# - Discover new devices
+# - Ability to lock a component to prevent it from changing its value/type
+
+# Big question:
+# A difference between network and scenario is that network guarantees the msg ordering
+# while scenario can in principle fail to notice that two nodes where 'done' simultaneously.
+# I think scenario should guarantee the 'chronological' order as well
+
+
+# Questions:
+# - Do we need to terminate device and component's tasks when we pop them?
+# - In principle a Listener can have many parents (and therefore buses)
+
+# Scenario should lock the required components before room_image change its state
+
+# Comments:
+# 1. I wonder if we should use call_soon or add_task...
+# 2. Write the conversion process of component's value
+# 3. I don't like that components are created only when we know one's name
+# 4. Remove loops and use get_event_loop?
+# 5. I feels weird for type and value to be futures because, except for the initialization,
+#    they are set unexpectively by the messages they receive (they don't wait on anything)
