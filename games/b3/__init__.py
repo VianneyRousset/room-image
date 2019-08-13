@@ -12,7 +12,7 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from .escapegame import Node, Event
+import lib.escapegame as eg 
 
 # Features:
 # - Translate a physical events into a node
@@ -44,9 +44,18 @@ from .escapegame import Node, Event
 # instead of game.gets('a', 'b') write (game.get(node) for node in set('a', 'b'))
 # to discuss...
 
-room = escapegame.Room()
-room.add_bus(escapegame.Bus())
+name = 'b3'
 
+room = eg.Network()
+bus = eg.Bus('socket path')
+room.add_bus(bus)
+
+roots = set()
+
+puzzle = eg.Puzzle()
+roots.add(puzzle)
+
+'''
 # start 
 node = game.add(name='start', Node(reversible=False))
 node.head = lambda self: print('mouahaha')
@@ -80,3 +89,4 @@ node.add_parents('launch')
 node.add_conditions(*game.gets('door opened'))
 
 game.add_conditions(node)
+'''

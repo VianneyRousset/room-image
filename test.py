@@ -13,22 +13,24 @@
 '''
 
 import asyncio, sys
-import server
+from lib.escapegame import Network, Bus
 
 async def call_devices(bus):
+    print('dring...')
+    #cs = (bus.send(device_id + 0x0, 'ping') for device_id in range(64))
+    #await asyncio.gather(*cs)
+    await bus.send(0x00, 'ping') #broadcast
+
+async def main():
+    net = Network()
+    for i in range(1):
+        bus = Bus()
+        net.add_bus(bus)
+
     while True:
-        await bus.send(0x00, 'ping') #broadcast
-        await asyncio.sleep(5)
+        line = await asyncio.get_running_loop().run_in_executor(None, sys.stdin.readline)
+        if line[:-1] == 'r':
+            asyncio.create_task(call_devices(bus))
 
-async def main(loop):
-    from games import b3
-    server.games['b3'] = b3
-    await call_devices(b3.bus)
-
-async def start_tasks(app):
-    app['game'] = app.loop.create_task(main(app.loop))
-
-import server
-server.app.on_startup.append(start_tasks)
-server.start()
-
+if __name__ == "__main__":
+    asyncio.run(main())
