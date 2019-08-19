@@ -21,6 +21,7 @@ def read_puzzles(game):
 def read_devices(game):
     devices = dict()
     for device in game.room.devices.values():
-        devices[device.name] = {'comps' : list(device.comps.keys())}
+        name = f'device{device.device_id}' if device.name is None else device.name
+        devices[name] = {'comps' : list(device.comps.keys())}
     return devices
 

@@ -16,8 +16,12 @@ from aiohttp import web
 from aiohttp_sse import sse_response
 import asyncio
 import json
+import aiohttp_jinja2
+import jinja2
 
 import server.tools
+
+import settings
 
 games = dict()
 routes = web.RouteTableDef()
@@ -28,9 +32,12 @@ async def home(request):
     return web.Response(text=f'available games are {games.keys()}')
 
 @routes.get('/{game_name}')
-async def game(request):
+async def devices_index(request):
     game_name = request.match_info['game_name']
-    return web.Response(text=f'you can get the puzzles description at /{game_name}/puzzles')
+    context = {'game_name' : game_name}
+    response = aiohttp_jinja2.render_template('monitor.jinja2',
+                                              request, context)
+    return response 
 
 @routes.get('/{game_name}/puzzles')
 async def puzzles(request):
@@ -53,31 +60,15 @@ async def devices(request):
     async with sse_response(request) as resp:
         while True:
             devices = tools.read_devices(game)
-            print(json.dumps(devices))
-            await resp.send(json.dumps(devices))
-            async with game.room.devices_changed:
-                await game.room.devices_changed.wait()
+            await resp.send(json.dumps(devices)) # or what constitue them...
+            async with game.room:
+                await game.room.wait('devices')
     return resp
 
-@routes.get('/{game_name}/devices_index')
-async def devices_index(request):
-    d = """
-        <html>
-        <body>
-            <script>
-                var evtSource = new EventSource("/b3/devices");
-                evtSource.onmessage = function(e) {
-                    document.getElementById('response').innerText = e.data
-                }
-            </script>
-            <h1>Response from server:</h1>
-            <div id="response"></div>
-        </body>
-    </html>
-    """
-    return web.Response(text=d, content_type='text/html')
 
 app = web.Application()
+aiohttp_jinja2.setup(app,
+    loader=jinja2.FileSystemLoader('server/templates'))
 app.add_routes(routes)
 
 def start():

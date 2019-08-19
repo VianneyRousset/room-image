@@ -1,0 +1,19 @@
+<html>
+	<body>
+		<script>
+			var evtSource = new EventSource("/{{ game_name }}/devices");
+			evtSource.onmessage = function(e) {
+				document.getElementById("devices").innerText = e.data
+			}
+			var evtSource = new EventSource("/{{ game_name }}/puzzles");
+			evtSource.onmessage = function(e) {
+				document.getElementById("puzzles").innerText = e.data
+			}
+		</script>
+		<h1>Game {{ game_name }}</h1>
+		<h2>Devices:</h2>
+		<div id="devices"></div>
+		<h2>Puzzles:</h2>
+		<div id="puzzles"></div>
+	</body>
+</html>

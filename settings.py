@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 '''
@@ -12,20 +13,4 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import settings
-settings.testing = True
-
-import asyncio, sys
-import server
-
-async def main(loop):
-    from games import b3
-    server.games['b3'] = b3
-
-async def start_tasks(app):
-    app['game'] = app.loop.create_task(main(app.loop))
-
-import server
-server.app.on_startup.append(start_tasks)
-server.start()
-
+testing = False
