@@ -15,28 +15,39 @@
 import asyncio, random
 from math import floor
 
-packets = asyncio.Queue() 
+packets = asyncio.Queue()
 
-devices = {
-     4 : {'name' : 'Phil'},
-    24 : {'name' : 'Walt'},
-    56 : {'name' : 'Coral'},
-    11 : {'name' : 'Nichole'},
-    12 : {'name' : 'Elin'},
-    19 : {'name' : 'Zia'},
-    84 : {'name' : 'Kendrick'}
-    }
+n_device = lambda : 3
+n_comp = lambda : random.randint(1, 2)
+n_attr = lambda : random.randint(1, 4)
 
-COMPUTER_SEND_DELAY = 2
-ARDUINO_SEND_DELAY = 6
+names = {'Phil', 'Shade', 'Karly', 'Emelia', 'Mauricio', 'Leona', 'Kensey', 'Walt', 'Marina', 'Don', 'Tai', 'Stan', 'Adrianna', 'Coral', 'Tyra', 'Ezio', 'Isis', 'Nichole', 'Caoimhe', 'Adam', 'Mikey', 'Freddy', 'Angelina', 'Electra', 'Dee', 'May', 'Priya', 'Jordan', 'Arwen', 'Elin', 'Stacia', 'Arman', 'Dominique', 'Rupert', 'Mike', 'Monica', 'Zia', 'Chayton'}
+_n_device = n_device()
+devices = dict()
+for device_id, device_name in zip(range(1, _n_device+1), random.sample(names, _n_device)): 
+    _n_comp = n_comp() 
+    comps = list()
+    for comp_name in random.sample(names, _n_comp): 
+        _n_attr = n_attr()
+        attrs = list()
+        for attr_name in random.sample(names, _n_attr):
+            attrs.append({'name' : attr_name, 'type' : 'float'})
+        comps.append({'name' : comp_name, 'attrs' : attrs})
+    devices[device_id] = {'name' : device_name, 'comps' : comps} 
 
+import json
+print(json.dumps(devices, indent=4))
+
+COMPUTER_SEND_DELAY = 0
+ARDUINO_SEND_DELAY = 0
 
 # The computer listen
 async def listen():
     asyncio.get_event_loop().create_task(events_creator())
     while True:
         await asyncio.sleep(0)
-        yield await packets.get()
+        packet = await packets.get()
+        yield packet
 
 # The computer send
 async def send(dest, msg):
@@ -53,14 +64,24 @@ async def send(dest, msg):
 async def device_answer(dest, msg):
     import re
     if msg == 'ping':
-        new_packet(dest, 'ping_back')
-    elif msg == 'get name':
-        new_packet(dest, f'upt name {devices[dest]["name"]}')
-    elif msg == 'get n_comp':
-        new_packet(dest, f'upt n_comp {floor(dest/10)+1}')
-    elif re.match('get comp \d name', msg):
-        comp_id = msg.split()[2]
-        new_packet(dest, f'upt comp {comp_id} name comp{comp_id}')
+        return new_packet(dest, 'ping_back')
+    device = devices[dest]
+    if msg == 'get name':
+        return new_packet(dest, f'upt name {device["name"]}')
+    comps = device["comps"]
+    if msg == 'get n_comp':
+        return new_packet(dest, f'upt n_comp {len(comps)}')
+    comp_id = int(msg.split()[2])
+    comp = comps[comp_id]
+    if re.match('get comp \d+ name', msg):
+        return new_packet(dest, f'upt comp {comp_id} name {comp["name"]}')
+    attrs = comp["attrs"]
+    if re.match('get comp \d+ n_attr', msg):
+        return new_packet(dest, f'upt comp {comp_id} n_attr {len(comp["attrs"])}')
+    attr_id = int(msg.split()[4])
+    attr = attrs[attr_id]
+    if re.match('get comp \d+ attr \d+ desc', msg):
+        return new_packet(dest, f'upt comp {comp_id} attr {attr_id} desc {attr["name"]} {attr["type"]}')
 
 # Create a packet sent by a device
 def new_packet(src, msg, wait=False, *, random_wait=True):

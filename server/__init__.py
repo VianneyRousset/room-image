@@ -55,11 +55,11 @@ async def puzzles(request):
 async def devices(request):
     game_name = request.match_info['game_name']
     game = games[game_name]
-    devices = tools.read_devices(game)
+    devices = tools.read_devices(game.room)
     loop = request.app.loop
     async with sse_response(request) as resp:
         while True:
-            devices = tools.read_devices(game)
+            devices = tools.read_devices(game.room)
             await resp.send(json.dumps(devices)) # or what constitue them...
             async with game.room:
                 await game.room.wait('devices')

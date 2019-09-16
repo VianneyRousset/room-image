@@ -1,1 +1,7 @@
-handle device's names duplicate
+DONE: handle device's names duplicate
+TODO: device disconnection
+DONE: update comps should trigger devices_updated
+TODO: listener decorator
+TODO: python3.6 and python3.7 compatibility
+TODO: bus deconnection
+TODO: regex should accept names containing numbers
