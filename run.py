@@ -13,7 +13,7 @@
 '''
 
 import settings
-settings.testing = True
+settings.testing = 'b3'
 
 import asyncio, sys
 import server

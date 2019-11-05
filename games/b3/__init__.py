@@ -50,10 +50,20 @@ room = eg.Network()
 bus = eg.Bus('socket path')
 room.add_bus(bus)
 
+#device = eg.Device(name='entrance')
+#room.add_device(device)
+
 roots = set()
 
-puzzle = eg.Puzzle()
-roots.add(puzzle)
+'''
+start = eg.Puzzle('start')
+start.head = lambda: print('Close the door to start the game')
+start.tail = lambda: print('The game has started')
+start.predicate = lambda: print(room['salut'])
+start.active.set()
+roots.add(start)
+'''
+
 
 '''
 # start 

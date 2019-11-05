@@ -13,4 +13,5 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
-testing = False
+testing = None 
+com_debug = True

@@ -36,3 +36,14 @@
 # 4. Remove loops and use get_event_loop?
 # 5. I feels weird for type and value to be futures because, except for the initialization,
 #    they are set unexpectively by the messages they receive (they don't wait on anything)
+# 6. Instead of the usual loops
+#		async with node:
+#			while True:
+#				a = await node.wait('a')
+#				// do stuff
+#	 we should be able to write
+#		async for a in node.track('a'):
+			// do stuff
+# 7. It is not recommended to create a device with name and adress, because
+			they are not checked
+# 8. A Device(addr=None, name=None) is basically invisible until an addr or a name is set manually

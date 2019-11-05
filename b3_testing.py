@@ -14,29 +14,40 @@
 
 import asyncio, random
 from math import floor
+import re
 
 packets = asyncio.Queue()
 
-n_device = lambda : 3
-n_comp = lambda : random.randint(1, 2)
-n_attr = lambda : random.randint(1, 4)
-
-names = {'Phil', 'Shade', 'Karly', 'Emelia', 'Mauricio', 'Leona', 'Kensey', 'Walt', 'Marina', 'Don', 'Tai', 'Stan', 'Adrianna', 'Coral', 'Tyra', 'Ezio', 'Isis', 'Nichole', 'Caoimhe', 'Adam', 'Mikey', 'Freddy', 'Angelina', 'Electra', 'Dee', 'May', 'Priya', 'Jordan', 'Arwen', 'Elin', 'Stacia', 'Arman', 'Dominique', 'Rupert', 'Mike', 'Monica', 'Zia', 'Chayton'}
-_n_device = n_device()
-devices = dict()
-for device_id, device_name in zip(range(1, _n_device+1), random.sample(names, _n_device)): 
-    _n_comp = n_comp() 
-    comps = list()
-    for comp_name in random.sample(names, _n_comp): 
-        _n_attr = n_attr()
-        attrs = list()
-        for attr_name in random.sample(names, _n_attr):
-            attrs.append({'name' : attr_name, 'type' : 'float'})
-        comps.append({'name' : comp_name, 'attrs' : attrs})
-    devices[device_id] = {'name' : device_name, 'comps' : comps} 
-
-import json
-print(json.dumps(devices, indent=4))
+devices = {
+        1 : {'name' : 'entrance',
+            'comps' : [
+                {
+                    'name' : 'main_door',
+                    'attrs' : [
+                        {
+                            'name' : 'state',
+                            'type' : 'bool',
+                            'value' : 'False'
+                            }
+                        ]
+                    }
+                ]
+            },
+        2 : {'name' : 'corridor',
+            'comps' : [
+                {
+                    'name' : 'trap',
+                    'attrs' : [
+                        {
+                            'name' : 'state',
+                            'type' : 'bool',
+                            'value' : 'False'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
 
 COMPUTER_SEND_DELAY = 0
 ARDUINO_SEND_DELAY = 0
@@ -63,25 +74,10 @@ async def send(dest, msg):
 # Emulate device's answers 
 async def device_answer(dest, msg):
     import re
-    if msg == 'ping':
-        return new_packet(dest, 'ping_back')
     device = devices[dest]
-    if msg == 'get name':
-        return new_packet(dest, f'upt name {device["name"]}')
     comps = device["comps"]
-    if msg == 'get n_comp':
-        return new_packet(dest, f'upt n_comp {len(comps)}')
-    comp_id = int(msg.split()[2])
-    comp = comps[comp_id]
-    if re.match('get comp \d+ name', msg):
-        return new_packet(dest, f'upt comp {comp_id} name {comp["name"]}')
-    attrs = comp["attrs"]
-    if re.match('get comp \d+ n_attr', msg):
-        return new_packet(dest, f'upt comp {comp_id} n_attr {len(comp["attrs"])}')
-    attr_id = int(msg.split()[4])
-    attr = attrs[attr_id]
-    if re.match('get comp \d+ attr \d+ desc', msg):
-        return new_packet(dest, f'upt comp {comp_id} attr {attr_id} desc {attr["name"]} {attr["type"]}')
+    if re.match('\s*get\s+desc\s*', msg):
+        return new_packet(dest, f'upt desc {device["name"]} {len(comps)}')
 
 # Create a packet sent by a device
 def new_packet(src, msg, wait=False, *, random_wait=True):
@@ -96,9 +92,8 @@ def new_packet(src, msg, wait=False, *, random_wait=True):
 
 # Random events
 async def events_creator():
-    while True:
-        await asyncio.sleep(10)
-        #new_packet(34, 'hello!')
+    await asyncio.sleep(2)
+    #new_packet(1, 'upt comp 0 attr 0 value True')
 
 '''
 Remarks:
